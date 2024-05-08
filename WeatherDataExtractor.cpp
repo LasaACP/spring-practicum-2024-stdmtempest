@@ -1,9 +1,21 @@
+#include "WeatherDataExtractor.h"
 #include <iostream>
 #include <fstream>
 #include <bits/stdc++.h>
 using namespace std;
 
-int CSVlength(int order_num) {
+WeatherDataExtractor::WeatherDataExtractor(int order)
+{
+  order_num = order;
+  csv_array.clear();
+  WeatherDataExtractor::populateArray();
+}
+
+WeatherDataExtractor::~WeatherDataExtractor()
+{
+}
+
+int WeatherDataExtractor::CSVlength() {
   string csv_file_name = "weather-data/" + to_string(order_num) + ".csv";
   ifstream csv_file(csv_file_name);
   if (!csv_file.is_open()) {
@@ -21,9 +33,10 @@ int CSVlength(int order_num) {
   return -1;
 }
 
-void CSVarray(int order_num, vector<vector<string>> &v) {
+void WeatherDataExtractor::populateArray() {
+  csv_array.clear();
   string csv_file_name = "weather-data/" + to_string(order_num) + ".csv";
-  int length = CSVlength(order_num);
+  int length = CSVlength();
   string line;
   ifstream csv_file(csv_file_name);
   getline(csv_file, line);
@@ -51,12 +64,21 @@ void CSVarray(int order_num, vector<vector<string>> &v) {
         line = line.substr(line.find("\"") + 1);
       }
     }
-    v.push_back(row);
+    csv_array.push_back(row);
   }
 }
 
 int main() {
-  cout << CSVlength(3674657) << endl;
-  vector<vector<string>> csv_array;
-  CSVarray(3674657, csv_array);
+  cout << "-------TESTING IN PROGRESS-------" << endl;
+  WeatherDataExtractor wde(3674657);
+  cout << wde.CSVlength() << endl;
+  for (int i = 0; i < wde.csv_array[0].size(); i++) {
+    cout << wde.csv_array[0][i] << " ";
+  }
+  cout << endl;
+  for (int i = 0; i < wde.csv_array[0].size(); i++) {
+    cout << wde.csv_array[wde.csv_array.size()-1][i] << " ";
+  }
+  cout << endl;
+  cout << "-------TESTING COMPLETE-------" << endl;
 }
