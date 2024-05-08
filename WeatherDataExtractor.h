@@ -8,6 +8,18 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+struct WeatherData {
+  int day;
+  int month;
+  int year;
+  double latitude;
+  double longitude;
+  double elevation;
+  double precipitation;
+  double tmax;
+  double tmin;
+};
+
 class WeatherDataExtractor
 {
 public:
@@ -19,7 +31,7 @@ public:
 
   int CSVlength();
   void populateArray();
-
+  vector<WeatherData> WeatherDataFiveDays();
 };
 
 #endif // WEATHERDATAEXTRACTOR_H
