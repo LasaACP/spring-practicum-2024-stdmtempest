@@ -5,6 +5,7 @@
 #include <string>
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>
+#include <curl/cURLpp.hpp>
 
 using namespace std;
 using namespace web;
