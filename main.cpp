@@ -28,29 +28,7 @@ int main() {
     res = curl_easy_perform(curl);
   }
   curl_easy_cleanup(curl);
-    return 0;
+  return 0;
 
-  // std::cout << "\tEnter city name: ";
-  // string city;
-  // getline(cin, city);
-
-  /*http_client client(U("https://api.openweathermap.org/data/2.5"));
-  uri_builder builder(U("/weather"));
-  builder.append_query(U("q"), utility
-      ::conversions::to_string_t(city));
-  builder.append_query(U("appid"), U("6671712a2ca189d80eff02bc5f2c8727"));
-  http_request request(methods::GET);
-  request.set_request_uri(builder.to_string());
-
-  client.request(request).then([](http_response response) {
-      return response.extract_json();
-      }
-  ).then([](web::json::value body) {
-          cout << "\tTemperature is " <<
-  (body[U("main")][U("temp")].as_double()-273.15)*(9/5+32) << " F" << endl;
-
-      }).wait();
-
-
-      return 0;
+  return 0;
 }
