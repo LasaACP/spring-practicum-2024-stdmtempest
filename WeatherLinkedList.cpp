@@ -12,6 +12,7 @@ WeatherLinkedList& list) {
     return;
   }
   
+
   int month, day;
   string place;
   cout << "Enter month:";
