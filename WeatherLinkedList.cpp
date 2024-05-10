@@ -1,6 +1,11 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "WeatherLinkedList.h"
+using namespace std;
 
-
-void CSVtoLinkedList(string csv_file_name, WeatherLinkedList& list) {
+void CSVtoLinkedList(string csv_file_name, 
+WeatherLinkedList& list) {
   ifstream csv_file(csv_file_name);
   if (!csv_file.is_open()) {
     cerr << "Error opening file: " << filename << endl;
@@ -9,19 +14,26 @@ void CSVtoLinkedList(string csv_file_name, WeatherLinkedList& list) {
 
   string line;
   while (getline(csv_file, line)) {
-    stringstream ss(line);
-    string token;
+    
+      size_t pos = 0;
+      int commaCount = 0;
+      while (pos != string::npos && commaCount < 8) {
+          pos = line.find(',', pos + 1);
+          commaCount++;
+      }
 
-    WeatherData data;
+      if (pos != string::npos) {
+        
+          string temperature;
+          string remainder;
+          split(line.substr(pos + 1), ',', temperature, remainder);
 
-    getline(ss, token, ',');
-    data.id = stoi(token);
-
-    getline(ss, token, ',');
-    data.name = token;
-
-    list.insert(data);
+          cout << "Temperature: " << temperature << endl;
+      } else {
+          cerr << "Row does not contain enough values." << endl;
+      }
   }
 
-  file.close();
+
+  csv_file.close();
 }

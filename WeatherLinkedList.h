@@ -8,7 +8,6 @@
 using namespace std;
 
 
-
 #include <cstring>
 #include <string>
 #include <iostream>
@@ -28,39 +27,36 @@ public:
   double tmax;
   double tmin;
 
-    WeatherData();
-    WeatherData(string plc, double lat, double lon, double elv, int mon, int day, int yr, double prc, double tmx, double tmn);
-    ~WeatherData();
-    string toString();
+  WeatherData();
+  WeatherData(string plc, double lat, double lon, double elv, int mon, int day, int yr, double prc, double tmx, double tmn);
+  ~WeatherData();
+  string toString();
 };
 
 
 class node{
-      public:
-      WeatherData* data;
-      node* next;
-      node(WeatherData* a);
-      node(WeatherData* a, node* n);
+  public:
+  WeatherData* data;
+  node* next;
+  node(WeatherData* a);
+  node(WeatherData* a, node* n);
 };
 
 
 class LinkedList{
-
   public:
-
-
-      node* head;
+    node* head;
 
 LinkedList();
 ~LinkedList();
-void add(WeatherData value);
-void clear();
-WeatherData get(int mon, int day, string plc);
-bool isEmpty();
-int size();
-string toString();
-void CSVtoLinkedList(string csv_file_name, WeatherLinkedList& list);
+  void add(WeatherData value);
+  void clear();
+  WeatherData get(int mon, int day, string plc);
+  bool isEmpty();
+  int size();
+  string toString();
+  void CSVtoLinkedList(string csv_file_name, WeatherLinkedList& list);
 
 };
 
-      #endif
+#endif
