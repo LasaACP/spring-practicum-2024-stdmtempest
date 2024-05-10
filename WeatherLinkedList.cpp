@@ -11,7 +11,16 @@ WeatherLinkedList& list) {
     cerr << "Error opening file: " << filename << endl;
     return;
   }
-
+  
+  int month, day;
+  string place;
+  cout << "Enter month:";
+  cin >> month;
+  cout << "Enter day:";
+  cin >> day;
+  cout << "Enter place:";
+  getline(cin, place);
+  
   string line;
   while (getline(csv_file, line)) {
     
