@@ -3,6 +3,7 @@
 #include <iostream>
 #include <json/json.h>
 #include <string>
+#include "allergy.cpp"
 
 size_t WriteCallback(void *contents, size_t size, size_t nmemb,
                      std::string *s) {
