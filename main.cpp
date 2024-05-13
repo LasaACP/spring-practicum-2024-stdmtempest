@@ -1,9 +1,10 @@
+#include "allergy.cpp"
+#include "futureWeather.cpp"
 #include <ctime>
 #include <curl/curl.h>
 #include <iostream>
 #include <json/json.h>
 #include <string>
-#include "allergy.cpp"
 
 size_t WriteCallback(void *contents, size_t size, size_t nmemb,
                      std::string *s) {
@@ -99,9 +100,23 @@ int main() {
     } else {
       std::cout << "Failed to parse JSON" << std::endl;
     }
-    
+
+    allergyReport();
+    std::cout << "---------------------------------------------------"
+              << std::endl;
+    std::cout << "---------------------------------------------------"
+              << std::endl;
+    std::cout << "---------------------------------------------------"
+              << std::endl;
+    std::cout << "---------------------------------------------------"
+              << std::endl;
+    std::cout << "---------------------------------------------------"
+              << std::endl;
+    std::cout << "---------------------------------------------------"
+              << std::endl;
+    futureWeather();
   }
-  
+
   return 0;
 }
 
