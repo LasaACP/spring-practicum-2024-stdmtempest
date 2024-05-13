@@ -27,7 +27,7 @@ double kelvinToCelsius(double kelvin) { return kelvin - 273.15; }
 
 int main() {
   std::cout << "\t+----------------------------------+" << std::endl;
-  std::cout << "\t\tSTDM Tempest v.1" << std::endl;
+  std::cout << "\t\tSTDM Tempest v.2" << std::endl;
   std::cout << "\t+----------------------------------+" << std::endl;
   std::cout << "\tEnter city name: ";
   std::string city;
