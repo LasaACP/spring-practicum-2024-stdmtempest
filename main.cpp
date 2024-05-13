@@ -72,14 +72,18 @@ int main() {
           << "Do you want the temperature in Fahrenheit or Celsius? (F/C): ";
       char temp_unit;
       std::cin >> temp_unit;
-
+      bool f = false;
       double temp, feels_like;
+      std::string codeToPrint;
       if (temp_unit == 'F' || temp_unit == 'f') {
         temp = kelvinToFahrenheit(temp_kelvin);
         feels_like = kelvinToFahrenheit(feels_like_kelvin);
+        f = true;
+        codeToPrint = "°F";
       } else {
         temp = kelvinToCelsius(temp_kelvin);
         feels_like = kelvinToCelsius(feels_like_kelvin);
+        codeToPrint = "°C";
       }
 
       time_t t = time(0);
@@ -89,12 +93,14 @@ int main() {
                 << now->tm_mday << std::endl;
       std::cout << "Main: " << weather_main << std::endl;
       std::cout << "Description: " << weather_description << std::endl;
-      std::cout << "Temperature: " << temp << std::endl;
+      std::cout << "Temperature: " << temp << codeToPrint << std::endl;
       std::cout << "Feels Like: " << feels_like << std::endl;
     } else {
       std::cout << "Failed to parse JSON" << std::endl;
     }
+    
   }
+  
   return 0;
 }
 
