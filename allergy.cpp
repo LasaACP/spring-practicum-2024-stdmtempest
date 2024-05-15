@@ -1,3 +1,5 @@
+#include "CityDataExtractor.cpp"
+#include "CityLinkedList.cpp"
 #include <ctime>
 #include <curl/curl.h>
 #include <iostream>
@@ -51,13 +53,19 @@ void allergyReport() {
                       &errs)) {
       Json::Value times = jsonData["hourly"]["time"];
       Json::Value us_aqi_values = jsonData["hourly"]["us_aqi"];
-
+       int count = 0;
+      int sumAQI = 0;
       for (unsigned int i = 0; i < times.size(); i++) {
         if (!us_aqi_values[i].isNull()) {
-          std::cout << "Date: " << times[i].asString() << std::endl;
-          std::cout << "US AQI Value: " << us_aqi_values[i].asInt()
-                    << std::endl;
-          std::cout << "----------------------------------" << std::endl;
+        sumAQI = sumAQI + us_aqi_values[i].asInt();
+          count++;
+          if (count == 24) {
+            count = 0;
+            std::cout << "Date: " << times[i].asString() << std::endl;
+            std::cout << "US AQI Value: " << sumAQI / 24 << std::endl;
+            std::cout << "----------------------------------" << std::endl;
+            sumAQI = 0;
+          }
         }
       }
     } else {

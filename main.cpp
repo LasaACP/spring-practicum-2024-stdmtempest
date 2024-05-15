@@ -1,5 +1,6 @@
-#include "allergy.cpp"
-#include "futureWeather.cpp"
+#include "CityDataExtractor.cpp"
+#include "CityLinkedList.cpp"
+
 #include <ctime>
 #include <curl/curl.h>
 #include <iostream>
@@ -27,14 +28,176 @@ double kelvinToFahrenheit(double kelvin) {
 
 double kelvinToCelsius(double kelvin) { return kelvin - 273.15; }
 
+std::string weatherCodeToDescription(int code) {
+  std::map<int, std::string> weatherCodes = {
+      {0, "Clear sky"},
+      {1, "Mainly clear"},
+      {2, "Partly cloudy"},
+      {3, "Overcast"},
+      {45, "Fog"},
+      {48, "Depositing rime fog"},
+      {51, "Light drizzle"},
+      {53, "Moderate drizzle"},
+      {55, "Dense drizzle"},
+      {56, "Light freezing drizzle"},
+      {57, "Dense freezing drizzle"},
+      {61, "Slight rain"},
+      {63, "Moderate rain"},
+      {65, "Heavy rain"},
+      {66, "Light freezing rain"},
+      {67, "Heavy freezing rain"},
+      {71, "Slight snow fall"},
+      {73, "Moderate snow fall"},
+      {75, "Heavy snow fall"},
+      {77, "Snow grains"},
+      {80, "Slight rain showers"},
+      {81, "Moderate rain showers"},
+      {82, "Violent rain showers"},
+      {85, "Slight snow showers"},
+      {86, "Heavy snow showers"},
+      {95, "Slight thunderstorm"},
+      {96, "Thunderstorm with slight hail"},
+      {99, "Thunderstorm with heavy hail"}};
+  return weatherCodes[code];
+}
+
+void futureWeather(double latitude, double longitude) {
+  CURL *curl;
+  CURLcode res;
+  std::string readBuffer;
+
+  curl = curl_easy_init();
+  if (curl) {
+    std::string url = "https://api.open-meteo.com/v1/forecast?latitude=" +
+                      std::to_string(latitude) +
+                      "&longitude=" + std::to_string(longitude) +
+                      "&daily=weather_code%2Ctemperature_2m_max%2Ctemperature_"
+                      "2m_min&temperature_unit=fahrenheit&timezone=auto";
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
+    struct curl_slist *headers = NULL;
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+
+    Json::Value jsonData;
+    Json::CharReaderBuilder jsonReaderBuilder;
+    std::unique_ptr<Json::CharReader> const reader(
+        jsonReaderBuilder.newCharReader());
+
+    JSONCPP_STRING errs;
+    if (reader->parse(readBuffer.c_str(),
+                      readBuffer.c_str() + readBuffer.size(), &jsonData,
+                      &errs)) {
+      Json::Value times = jsonData["daily"]["time"];
+      Json::Value weather_codes = jsonData["daily"]["weather_code"];
+      Json::Value max_temps = jsonData["daily"]["temperature_2m_max"];
+      Json::Value min_temps = jsonData["daily"]["temperature_2m_min"];
+
+      for (unsigned int i = 0; i < times.size(); i++) {
+        std::cout << "Date: " << times[i].asString() << std::endl;
+        std::cout << "Weather: "
+                  << weatherCodeToDescription(weather_codes[i].asInt())
+                  << std::endl;
+        std::cout << "Max Temperature: " << max_temps[i].asFloat() << "°F"
+                  << std::endl;
+        std::cout << "Min Temperature: " << min_temps[i].asFloat() << "°F"
+                  << std::endl;
+        std::cout << "----------------------------------" << std::endl;
+      }
+    } else {
+      std::cout << "Failed to parse JSON" << std::endl;
+    }
+  }
+}
+
+void allergyReport(double latitude, double longitude) {
+  CURL *curl;
+  CURLcode res;
+  std::string readBuffer;
+
+  curl = curl_easy_init();
+  if (curl) {
+    std::string url =
+        "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" +
+        std::to_string(latitude) + "&longitude=" + std::to_string(longitude) +
+        "&hourly=us_aqi&timezone=auto";
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
+    struct curl_slist *headers = NULL;
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+
+    Json::Value jsonData;
+    Json::CharReaderBuilder jsonReaderBuilder;
+    std::unique_ptr<Json::CharReader> const reader(
+        jsonReaderBuilder.newCharReader());
+
+    JSONCPP_STRING errs;
+    if (reader->parse(readBuffer.c_str(),
+                      readBuffer.c_str() + readBuffer.size(), &jsonData,
+                      &errs)) {
+      Json::Value times = jsonData["hourly"]["time"];
+      Json::Value us_aqi_values = jsonData["hourly"]["us_aqi"];
+
+      for (unsigned int i = 0; i < times.size(); i++) {
+        if (!us_aqi_values[i].isNull()) {
+          std::cout << "Date: " << times[i].asString() << std::endl;
+          std::cout << "US AQI Value: " << us_aqi_values[i].asInt()
+                    << std::endl;
+          std::cout << "----------------------------------" << std::endl;
+        }
+      }
+    } else {
+      std::cout << "Failed to parse JSON" << std::endl;
+    }
+  }
+}
+
 int main() {
+
+  std::cout << "     \\     /    \n";
+  std::cout << "      .-'-.     \n";
+  std::cout << " _  .' .-. '.  \n";
+  std::cout << "|\\| '-.   .-' '|\n";
+  std::cout << "\\|\\'-..-' '-..-'|/\n";
+  std::cout << " \\|             |/\n";
+  std::cout << "  '-...____...-' \n";
+
   std::cout << "\t+----------------------------------+" << std::endl;
-  std::cout << "\t\tSTDM Tempest v.2" << std::endl;
+  std::cout << "\t\tSTDM Tempest v.3" << std::endl;
   std::cout << "\t+----------------------------------+" << std::endl;
+
   std::cout << "\tEnter city name: ";
   std::string city;
   getline(std::cin, city);
   std::cout << "\t+----------------------------------+" << std::endl;
+  CityLinkedList cityList;
+  CityDataExtractor cde;
+  for (int i = 0; i < cde.CSVlength(); i++) {
+    string cityName = cde.csv_array[i][0];
+    double latitude = std::stod(cde.csv_array[i][2]);
+    double longitude = std::stod(cde.csv_array[i][3]);
+    cityList.add(City(cityName, 0, latitude, longitude));
+  }
+  double latitude = cityList.getLat(city);
+  double longitude = cityList.getLon(city);
+
+  if (latitude != 0.0 && longitude != 0.0) {
+    std::cout << "Latitude: " << latitude << std::endl;
+    std::cout << "Longitude: " << longitude << std::endl;
+  } else {
+    std::cout << "City not found." << std::endl;
+  }
 
   CURL *curl;
   CURLcode res;
@@ -97,11 +260,12 @@ int main() {
       std::cout << "Description: " << weather_description << std::endl;
       std::cout << "Temperature: " << temp << codeToPrint << std::endl;
       std::cout << "Feels Like: " << feels_like << std::endl;
+
     } else {
       std::cout << "Failed to parse JSON" << std::endl;
     }
 
-    allergyReport();
+    allergyReport(latitude,longitude);
     std::cout << "---------------------------------------------------"
               << std::endl;
     std::cout << "---------------------------------------------------"
@@ -114,7 +278,7 @@ int main() {
               << std::endl;
     std::cout << "---------------------------------------------------"
               << std::endl;
-    futureWeather();
+    futureWeather(latitude,longitude);
   }
 
   return 0;
