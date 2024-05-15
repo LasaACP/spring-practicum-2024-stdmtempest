@@ -181,7 +181,7 @@ void allergyReport(double latitude, double longitude) {
       std::cout << "-----------------------------------------------------------"
                    "-------------------------------------------"
                 << std::endl;
-      std::cout << "\t\t\t\t\tAllergy Report for the next 4 days:" << std::endl;
+      std::cout << "\t\t\t\t\tAllergy Index for the next 4 days:" << std::endl;
       std::cout << "-----------------------------------------------------------"
                    "-------------------------------------------"
                 << std::endl;
@@ -242,8 +242,8 @@ int main() {
   double longitude = cityList.getLon(city);
 
   if (latitude != 0.0 && longitude != 0.0) {
-    // std::cout << "Latitude: " << latitude << std::endl;
-    // std::cout << "Longitude: " << longitude << std::endl;
+    std::cout << "Latitude: " << latitude << std::endl;
+    std::cout << "Longitude: " << longitude << std::endl;
   } else {
     std::cout << "City not found." << std::endl;
   }
@@ -329,4 +329,4 @@ int main() {
   return 0;
 }
 
-// run with g++ main.cpp -ljsoncpp -lcurl -o STDMTempestv2
+// run with g++ main.cpp -ljsoncpp -lcurl -o STDMTempestv3
