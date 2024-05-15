@@ -68,17 +68,17 @@ void WeatherDataExtractor::populateArray() {
   }
 }
 
-int main() {
-  cout << "-------TESTING IN PROGRESS-------" << endl;
-  WeatherDataExtractor wde(3674657);
-  cout << wde.CSVlength() << endl;
-  for (int i = 0; i < wde.csv_array[0].size(); i++) {
-    cout << wde.csv_array[0][i] << " ";
-  }
-  cout << endl;
-  for (int i = 0; i < wde.csv_array[0].size(); i++) {
-    cout << wde.csv_array[wde.csv_array.size()-1][i] << " ";
-  }
-  cout << endl;
-  cout << "-------TESTING COMPLETE-------" << endl;
-}
+// int main() {
+//   cout << "-------TESTING IN PROGRESS-------" << endl;
+//   WeatherDataExtractor wde(3674657);
+//   cout << wde.CSVlength() << endl;
+//   for (int i = 0; i < wde.csv_array[0].size(); i++) {
+//     cout << wde.csv_array[0][i] << " ";
+//   }
+//   cout << endl;
+//   for (int i = 0; i < wde.csv_array[0].size(); i++) {
+//     cout << wde.csv_array[wde.csv_array.size()-1][i] << " ";
+//   }
+//   cout << endl;
+//   cout << "-------TESTING COMPLETE-------" << endl;
+// }

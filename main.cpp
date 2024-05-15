@@ -5,6 +5,7 @@
 #include <curl/curl.h>
 #include <iostream>
 #include <json/json.h>
+#include <stdlib.h>
 #include <string>
 
 size_t WriteCallback(void *contents, size_t size, size_t nmemb,
@@ -24,6 +25,10 @@ size_t WriteCallback(void *contents, size_t size, size_t nmemb,
 
 double kelvinToFahrenheit(double kelvin) {
   return ((kelvin - 273.15) * 9 / 5) + 32;
+}
+void clear() {
+  // CSI[2J clears screen, CSI[H moves the cursor to top-left corner
+  std::cout << "\x1B[2J\x1B[H";
 }
 
 double kelvinToCelsius(double kelvin) { return kelvin - 273.15; }
@@ -61,7 +66,7 @@ std::string weatherCodeToDescription(int code) {
   return weatherCodes[code];
 }
 
-void futureWeather(double latitude, double longitude) {
+void futureWeather(double latitude, double longitude, string city) {
   CURL *curl;
   CURLcode res;
   std::string readBuffer;
@@ -101,7 +106,8 @@ void futureWeather(double latitude, double longitude) {
       std::cout << "-----------------------------------------------------------"
                    "-------------------------------------------"
                 << std::endl;
-      std::cout << "\t\t\t\t\tFuture Weather Forecast:" << std::endl;
+      std::cout << "\t\t\t\t\tFuture Weather Forecast in " << city << ": "
+                << std::endl;
       std::cout << "-----------------------------------------------------------"
                    "-------------------------------------------"
                 << std::endl;
@@ -145,7 +151,7 @@ std::string interpretAQI(int aqi) {
   }
 }
 
-void allergyReport(double latitude, double longitude) {
+void allergyReport(double latitude, double longitude, string city) {
   CURL *curl;
   CURLcode res;
   std::string readBuffer;
@@ -181,7 +187,8 @@ void allergyReport(double latitude, double longitude) {
       std::cout << "-----------------------------------------------------------"
                    "-------------------------------------------"
                 << std::endl;
-      std::cout << "\t\t\t\t\tAllergy Index for the next 4 days:" << std::endl;
+      std::cout << "\t\t\t\t\tAllergy Index for the next 4 days in " << city
+                << ": " << std::endl;
       std::cout << "-----------------------------------------------------------"
                    "-------------------------------------------"
                 << std::endl;
@@ -209,121 +216,145 @@ void allergyReport(double latitude, double longitude) {
 }
 
 int main() {
+  char again = 'y';
+  while (again == 'y' || again == 'Y') {
+    clear();
+    std::cout << "\n";
+    std::cout << "\n";
+    std::cout << "\t\t\t     \\     /    \n";
+    std::cout << "\t\t\t      .-'-.     \n";
+    std::cout << "\t\t\t _  .' .-. '.  \n";
+    std::cout << "\t\t\t|\\| '-.   .-' '|\n";
+    std::cout << "\t\t\t\\|\\'-..-' '-..-'|/\n";
+    std::cout << "\t\t\t \\|             |/\n";
+    std::cout << "\t\t\t  '-...____...-' \n";
 
-  std::cout << "\t\t\t     \\     /    \n";
-  std::cout << "\t\t\t      .-'-.     \n";
-  std::cout << "\t\t\t _  .' .-. '.  \n";
-  std::cout << "\t\t\t|\\| '-.   .-' '|\n";
-  std::cout << "\t\t\t\\|\\'-..-' '-..-'|/\n";
-  std::cout << "\t\t\t \\|             |/\n";
-  std::cout << "\t\t\t  '-...____...-' \n";
+    std::cout << "\t+----------------------------------+" << std::endl;
+    std::cout << "\t\tSTDM Tempest v.3" << std::endl;
+    std::cout << "\t\tThe Programmer's® Weather App" << std::endl;
+    std::cout << "\t\tProudly Endorsed by the Balloon Lobby" << std::endl;
+    std::cout << "\t+----------------------------------+" << std::endl;
 
-  std::cout << "\t+----------------------------------+" << std::endl;
-  std::cout << "\t\tSTDM Tempest v.3" << std::endl;
-  std::cout << "\t\tThe Programmer's® Weather App" << std::endl;
-  std::cout << "\t\tProudly Endorsed by the Balloon Lobby" << std::endl;
-  std::cout << "\t+----------------------------------+" << std::endl;
+    CityLinkedList cityList;
+    CityDataExtractor cde;
+    for (int i = 0; i < cde.CSVlength(); i++) {
+      string cityName = cde.csv_array[i][0];
+      double latitude = std::stod(cde.csv_array[i][2]);
+      double longitude = std::stod(cde.csv_array[i][3]);
+      cityList.add(City(cityName, 0, latitude, longitude));
+    }
+    std::string city;
+    double latitude = 0.0;
+    double longitude = 0.0;
+    while (latitude == 0.0 && longitude == 0.0) {
+      std::cout << "\tEnter (US) city name: ";
 
-  std::cout << "\tEnter (US) city name: ";
-  std::string city;
-  getline(std::cin, city);
-  std::cout << "\t+----------------------------------+" << std::endl;
-  std::cout << "" << std::endl;
-  std::cout << "" << std::endl;
-  CityLinkedList cityList;
-  CityDataExtractor cde;
-  for (int i = 0; i < cde.CSVlength(); i++) {
-    string cityName = cde.csv_array[i][0];
-    double latitude = std::stod(cde.csv_array[i][2]);
-    double longitude = std::stod(cde.csv_array[i][3]);
-    cityList.add(City(cityName, 0, latitude, longitude));
-  }
-  double latitude = cityList.getLat(city);
-  double longitude = cityList.getLon(city);
+      getline(std::cin, city);
+      std::cout << "\t+----------------------------------+" << std::endl;
+      std::cout << "" << std::endl;
+      std::cout << "" << std::endl;
+      latitude = cityList.getLat(city);
+      longitude = cityList.getLon(city);
+      if (latitude == 0.0 && longitude == 0.0) {
+        std::cout << "City not found. Please enter a valid city name."
+                  << std::endl;
+      }
+    }
+    CURL *curl;
+    CURLcode res;
+    std::string readBuffer;
 
-  if (latitude != 0.0 && longitude != 0.0) {
-    std::cout << "Latitude: " << latitude << std::endl;
-    std::cout << "Longitude: " << longitude << std::endl;
-  } else {
-    std::cout << "City not found." << std::endl;
-  }
+    curl = curl_easy_init();
+    if (curl) {
+      curl_easy_setopt(curl, CURLOPT_URL,
+                       ("https://api.openweathermap.org/data/2.5/weather?q=" +
+                        city + "&appid=6671712a2ca189d80eff02bc5f2c8727")
+                           .c_str());
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
+      struct curl_slist *headers = NULL;
+      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+      res = curl_easy_perform(curl);
+      curl_easy_cleanup(curl);
 
-  CURL *curl;
-  CURLcode res;
-  std::string readBuffer;
+      Json::Value jsonData;
+      Json::CharReaderBuilder jsonReaderBuilder;
+      std::unique_ptr<Json::CharReader> const reader(
+          jsonReaderBuilder.newCharReader());
 
-  curl = curl_easy_init();
-  if (curl) {
-    curl_easy_setopt(curl, CURLOPT_URL,
-                     ("https://api.openweathermap.org/data/2.5/weather?q=" +
-                      city + "&appid=6671712a2ca189d80eff02bc5f2c8727")
-                         .c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
-    struct curl_slist *headers = NULL;
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+      JSONCPP_STRING errs;
+      if (reader->parse(readBuffer.c_str(),
+                        readBuffer.c_str() + readBuffer.size(), &jsonData,
+                        &errs)) {
+        std::string weather_main = jsonData["weather"][0]["main"].asString();
+        std::string weather_description =
+            jsonData["weather"][0]["description"].asString();
+        double temp_kelvin = jsonData["main"]["temp"].asDouble();
+        double feels_like_kelvin = jsonData["main"]["feels_like"].asDouble();
 
-    Json::Value jsonData;
-    Json::CharReaderBuilder jsonReaderBuilder;
-    std::unique_ptr<Json::CharReader> const reader(
-        jsonReaderBuilder.newCharReader());
+        std::cout
+            << "Do you want the temperature in Fahrenheit or Celsius? (F/C): ";
+        char temp_unit;
+        std::cin >> temp_unit;
+        bool f = false;
+        double temp, feels_like;
+        std::string codeToPrint;
+        if (temp_unit == 'F' || temp_unit == 'f') {
+          temp = kelvinToFahrenheit(temp_kelvin);
+          feels_like = kelvinToFahrenheit(feels_like_kelvin);
+          f = true;
+          codeToPrint = "°F";
+        } else {
+          temp = kelvinToCelsius(temp_kelvin);
+          feels_like = kelvinToCelsius(feels_like_kelvin);
+          codeToPrint = "°C";
+        }
 
-    JSONCPP_STRING errs;
-    if (reader->parse(readBuffer.c_str(),
-                      readBuffer.c_str() + readBuffer.size(), &jsonData,
-                      &errs)) {
-      std::string weather_main = jsonData["weather"][0]["main"].asString();
-      std::string weather_description =
-          jsonData["weather"][0]["description"].asString();
-      double temp_kelvin = jsonData["main"]["temp"].asDouble();
-      double feels_like_kelvin = jsonData["main"]["feels_like"].asDouble();
+        time_t t = time(0);
+        struct tm *now = localtime(&t);
 
-      std::cout
-          << "Do you want the temperature in Fahrenheit or Celsius? (F/C): ";
-      char temp_unit;
-      std::cin >> temp_unit;
-      bool f = false;
-      double temp, feels_like;
-      std::string codeToPrint;
-      if (temp_unit == 'F' || temp_unit == 'f') {
-        temp = kelvinToFahrenheit(temp_kelvin);
-        feels_like = kelvinToFahrenheit(feels_like_kelvin);
-        f = true;
-        codeToPrint = "°F";
+        // printf("\033c");
+        // clear();
+        std::cout
+            << "-----------------------------------------------------------"
+               "-------------------------------------------"
+            << std::endl;
+        std::cout << "\t\t\t\t\tWeather Right Now In " << city << " on "
+                  << (now->tm_year + 1900) << '-' << (now->tm_mon + 1) << '-'
+                  << now->tm_mday << std::endl;
+        std::cout
+            << "-----------------------------------------------------------"
+               "-------------------------------------------"
+            << std::endl;
+        std::cout << "Main: " << weather_main << std::endl;
+        std::cout << "Description: " << weather_description << std::endl;
+        std::cout << "Temperature: " << temp << codeToPrint << std::endl;
+        std::cout << "Feels Like: " << feels_like << std::endl;
+
       } else {
-        temp = kelvinToCelsius(temp_kelvin);
-        feels_like = kelvinToCelsius(feels_like_kelvin);
-        codeToPrint = "°C";
+        std::cout << "Failed to parse JSON" << std::endl;
       }
 
-      time_t t = time(0);
-      struct tm *now = localtime(&t);
+      allergyReport(latitude, longitude, city);
+
+      futureWeather(latitude, longitude, city);
 
       std::cout << "-----------------------------------------------------------"
                    "-------------------------------------------"
                 << std::endl;
-      std::cout << "\t\t\t\t\tWeather Right Now In " << city << " on "
-                << (now->tm_year + 1900) << '-' << (now->tm_mon + 1) << '-'
-                << now->tm_mday << std::endl;
       std::cout << "-----------------------------------------------------------"
                    "-------------------------------------------"
                 << std::endl;
-      std::cout << "Main: " << weather_main << std::endl;
-      std::cout << "Description: " << weather_description << std::endl;
-      std::cout << "Temperature: " << temp << codeToPrint << std::endl;
-      std::cout << "Feels Like: " << feels_like << std::endl;
-
-    } else {
-      std::cout << "Failed to parse JSON" << std::endl;
+      std::cout << "Would you like to input another city? (y/n): ";
+      std::cin >> again;
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(),
+                      '\n'); // Add this line
     }
+    std::cout << "" << std::endl;
 
-    allergyReport(latitude, longitude);
-
-    futureWeather(latitude, longitude);
+    std::cout << "Ducky hopes to see you soon ;)" << std::endl;
   }
 
   return 0;
