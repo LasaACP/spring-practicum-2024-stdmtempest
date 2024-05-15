@@ -98,6 +98,14 @@ void futureWeather(double latitude, double longitude) {
       Json::Value max_temps = jsonData["daily"]["temperature_2m_max"];
       Json::Value min_temps = jsonData["daily"]["temperature_2m_min"];
 
+      std::cout << "-----------------------------------------------------------"
+                   "-------------------------------------------"
+                << std::endl;
+      std::cout << "\t\t\t\t\tFuture Weather Forecast:" << std::endl;
+      std::cout << "-----------------------------------------------------------"
+                   "-------------------------------------------"
+                << std::endl;
+
       for (unsigned int i = 0; i < times.size(); i++) {
         std::cout << "Date: " << times[i].asString() << std::endl;
         std::cout << "Weather: "
@@ -109,9 +117,31 @@ void futureWeather(double latitude, double longitude) {
                   << std::endl;
         std::cout << "----------------------------------" << std::endl;
       }
+
     } else {
       std::cout << "Failed to parse JSON" << std::endl;
     }
+  }
+}
+
+std::string interpretAQI(int aqi) {
+  if (aqi <= 50) {
+    return "Good air quality. It's a great day to be outside!";
+  } else if (aqi <= 100) {
+    return "Moderate air quality. Outdoor activities are generally safe.";
+  } else if (aqi <= 150) {
+    return "Unhealthy for sensitive groups. If you suffer from respiratory "
+           "issues, consider staying indoors.";
+  } else if (aqi <= 200) {
+    return "Unhealthy air quality. Everyone may begin to experience health "
+           "effects; members of sensitive groups may experience         "
+           "serious health effects.";
+  } else if (aqi <= 300) {
+    return "Very unhealthy air quality. Health warnings of emergency "
+           "conditions. Entire population is more likely to be affected.";
+  } else {
+    return "Hazardous air quality. Health alert: everyone may experience more "
+           "serious health effects.";
   }
 }
 
@@ -148,13 +178,28 @@ void allergyReport(double latitude, double longitude) {
                       &errs)) {
       Json::Value times = jsonData["hourly"]["time"];
       Json::Value us_aqi_values = jsonData["hourly"]["us_aqi"];
+      std::cout << "-----------------------------------------------------------"
+                   "-------------------------------------------"
+                << std::endl;
+      std::cout << "\t\t\t\t\tAllergy Report for the next 4 days:" << std::endl;
+      std::cout << "-----------------------------------------------------------"
+                   "-------------------------------------------"
+                << std::endl;
 
+      int count = 0;
+      int sumAQI = 0;
       for (unsigned int i = 0; i < times.size(); i++) {
         if (!us_aqi_values[i].isNull()) {
-          std::cout << "Date: " << times[i].asString() << std::endl;
-          std::cout << "US AQI Value: " << us_aqi_values[i].asInt()
-                    << std::endl;
-          std::cout << "----------------------------------" << std::endl;
+          sumAQI = sumAQI + us_aqi_values[i].asInt();
+          count++;
+          if (count == 24) {
+            count = 0;
+            std::cout << "Date: " << times[i].asString() << std::endl;
+            std::cout << "US AQI Value: " << sumAQI / 24 << std::endl;
+            std::cout << interpretAQI(sumAQI / 24) << std::endl;
+            std::cout << "----------------------------------" << std::endl;
+            sumAQI = 0;
+          }
         }
       }
     } else {
@@ -165,22 +210,26 @@ void allergyReport(double latitude, double longitude) {
 
 int main() {
 
-  std::cout << "     \\     /    \n";
-  std::cout << "      .-'-.     \n";
-  std::cout << " _  .' .-. '.  \n";
-  std::cout << "|\\| '-.   .-' '|\n";
-  std::cout << "\\|\\'-..-' '-..-'|/\n";
-  std::cout << " \\|             |/\n";
-  std::cout << "  '-...____...-' \n";
+  std::cout << "\t\t\t     \\     /    \n";
+  std::cout << "\t\t\t      .-'-.     \n";
+  std::cout << "\t\t\t _  .' .-. '.  \n";
+  std::cout << "\t\t\t|\\| '-.   .-' '|\n";
+  std::cout << "\t\t\t\\|\\'-..-' '-..-'|/\n";
+  std::cout << "\t\t\t \\|             |/\n";
+  std::cout << "\t\t\t  '-...____...-' \n";
 
   std::cout << "\t+----------------------------------+" << std::endl;
   std::cout << "\t\tSTDM Tempest v.3" << std::endl;
+  std::cout << "\t\tThe Programmer's® Weather App" << std::endl;
+  std::cout << "\t\tProudly Endorsed by the Balloon Lobby" << std::endl;
   std::cout << "\t+----------------------------------+" << std::endl;
 
-  std::cout << "\tEnter city name: ";
+  std::cout << "\tEnter (US) city name: ";
   std::string city;
   getline(std::cin, city);
   std::cout << "\t+----------------------------------+" << std::endl;
+  std::cout << "" << std::endl;
+  std::cout << "" << std::endl;
   CityLinkedList cityList;
   CityDataExtractor cde;
   for (int i = 0; i < cde.CSVlength(); i++) {
@@ -193,8 +242,8 @@ int main() {
   double longitude = cityList.getLon(city);
 
   if (latitude != 0.0 && longitude != 0.0) {
-    std::cout << "Latitude: " << latitude << std::endl;
-    std::cout << "Longitude: " << longitude << std::endl;
+    // std::cout << "Latitude: " << latitude << std::endl;
+    // std::cout << "Longitude: " << longitude << std::endl;
   } else {
     std::cout << "City not found." << std::endl;
   }
@@ -253,9 +302,16 @@ int main() {
 
       time_t t = time(0);
       struct tm *now = localtime(&t);
-      std::cout << "Here is the weather in " << city << " on "
+
+      std::cout << "-----------------------------------------------------------"
+                   "-------------------------------------------"
+                << std::endl;
+      std::cout << "\t\t\t\t\tWeather Right Now In " << city << " on "
                 << (now->tm_year + 1900) << '-' << (now->tm_mon + 1) << '-'
                 << now->tm_mday << std::endl;
+      std::cout << "-----------------------------------------------------------"
+                   "-------------------------------------------"
+                << std::endl;
       std::cout << "Main: " << weather_main << std::endl;
       std::cout << "Description: " << weather_description << std::endl;
       std::cout << "Temperature: " << temp << codeToPrint << std::endl;
@@ -265,20 +321,9 @@ int main() {
       std::cout << "Failed to parse JSON" << std::endl;
     }
 
-    allergyReport(latitude,longitude);
-    std::cout << "---------------------------------------------------"
-              << std::endl;
-    std::cout << "---------------------------------------------------"
-              << std::endl;
-    std::cout << "---------------------------------------------------"
-              << std::endl;
-    std::cout << "---------------------------------------------------"
-              << std::endl;
-    std::cout << "---------------------------------------------------"
-              << std::endl;
-    std::cout << "---------------------------------------------------"
-              << std::endl;
-    futureWeather(latitude,longitude);
+    allergyReport(latitude, longitude);
+
+    futureWeather(latitude, longitude);
   }
 
   return 0;
